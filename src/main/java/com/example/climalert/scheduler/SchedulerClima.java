@@ -3,6 +3,7 @@ package com.example.climalert.scheduler;
 import com.example.climalert.alerta.ServiceAlerta;
 import com.example.climalert.clima.RepositoryRegistroClima;
 import com.example.climalert.clima.ServiceClima;
+import com.example.climalert.email.ServiceEmail;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -11,16 +12,19 @@ public class SchedulerClima {
 
     private final ServiceClima climaService;
     private final ServiceAlerta alertaService;
+    private final ServiceEmail emailService;
     private final RepositoryRegistroClima repositoryRegistroClima;
 
     public SchedulerClima(
             ServiceClima climaService,
             ServiceAlerta alertaService,
-            RepositoryRegistroClima repositoryRegistroClima
+            RepositoryRegistroClima repositoryRegistroClima,
+            ServiceEmail emailService
     ) {
         this.climaService = climaService;
         this.alertaService = alertaService;
         this.repositoryRegistroClima = repositoryRegistroClima;
+        this.emailService = emailService;
     }
 
     @Scheduled(fixedRate = 300000)
@@ -42,7 +46,8 @@ public class SchedulerClima {
                 .ifPresent(registro -> {
 
                     if (alertaService.esCondicionCritica(registro)) {
-                        System.out.println("ALERTA CLIMATICA DETECTADA");
+                        emailService.enviarAlerta(registro);
+                        System.out.println("ALERTA CLIMATICA ENVIADA");
                     }
 
                 });
